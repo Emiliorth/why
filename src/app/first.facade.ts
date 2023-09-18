@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
-import {BehaviorSubject, combineLatest, Observable, Subscription, tap} from 'rxjs';
+import {NavigationEnd, Router} from '@angular/router';
+import {BehaviorSubject, combineLatest, debounceTime, filter, Observable, Subscription, tap} from 'rxjs';
 import {SecondFacade} from 'src/app/second.facade';
 
 @Injectable({
@@ -14,6 +15,7 @@ export class FirstFacade {
     private subscription = new Subscription();
 
     constructor(
+        private readonly router: Router,
         private secondFacade: SecondFacade
     ) {
         this.firstBS$ = this._firstBS$.asObservable();
@@ -23,7 +25,8 @@ export class FirstFacade {
     }
 
     private firstCL() {
-        return combineLatest([this.firstBS$, this.thirdBS$]).pipe(
+        return combineLatest([this.router.events, this.thirdBS$]).pipe(
+            filter(([e]) => e instanceof NavigationEnd),
             tap(([first, third]) => {
                 debugger;
                 console.log('first', first);
